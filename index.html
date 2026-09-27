@@ -30,7 +30,7 @@
             margin-bottom: 20px;
         }
 
-        /* КАРДИОГРАММА НАД СЕРДЦЕМ */
+        /* КАРДИОГРАММА */
 
         .ecg {
             width: 100%;
@@ -53,10 +53,15 @@
             stroke-width: 4;
             stroke-linecap: round;
             stroke-linejoin: round;
+            opacity: 0;
+        }
 
+        /* Кардиограмма работает только во время измерения */
+
+        .ecg.active .ecg-line {
+            opacity: 1;
             stroke-dasharray: 800;
             stroke-dashoffset: 800;
-
             animation: ecgMove 1.5s linear infinite;
         }
 
@@ -70,11 +75,18 @@
             }
         }
 
+
         /* СЕРДЦЕ */
 
         .heart {
             font-size: 58px;
             margin: 0 0 20px;
+            transform: scale(1);
+        }
+
+        /* Сердце начинает биться после нажатия */
+
+        .heart.active {
             animation: heartbeat 1.5s infinite;
         }
 
@@ -84,7 +96,7 @@
             }
 
             10% {
-                transform: scale(1.12);
+                transform: scale(1.13);
             }
 
             20% {
@@ -96,12 +108,14 @@
             }
         }
 
+
         label {
             display: block;
             text-align: left;
             margin-bottom: 8px;
             font-size: 16px;
         }
+
 
         select,
         input {
@@ -119,6 +133,7 @@
             font-size: 16px;
         }
 
+
         button {
             width: 100%;
             height: 52px;
@@ -133,9 +148,11 @@
             cursor: pointer;
         }
 
+
         button:hover {
             opacity: 0.9;
         }
+
 
         #result {
             margin-top: 25px;
@@ -145,6 +162,7 @@
             min-height: 35px;
         }
 
+
         #timer {
             margin-top: 10px;
             font-size: 18px;
@@ -152,29 +170,58 @@
             min-height: 25px;
         }
 
+
+        /* ЗЕЛЁНАЯ РАМКА С СОВЕТОМ */
+
         #advice {
             margin-top: 20px;
+        }
+
+
+        .advice-box {
+            padding: 16px;
+
+            border: 2px solid #39b54a;
+            border-radius: 15px;
+
+            background: #f3fff5;
+
+            color: #333;
+
             font-size: 16px;
             line-height: 1.5;
-            color: #333;
+
+            text-align: left;
         }
+
 
         .advice-title {
             font-weight: bold;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
+            color: #278c38;
         }
+
+
+        .advice-text {
+            color: #333;
+        }
+
     </style>
 </head>
+
 
 <body>
 
 <div class="container">
-
     <h1>❤️ Трекер пульса</h1>
 
+
     <!-- КАРДИОГРАММА -->
-    <div class="ecg">
-        <svg viewBox="0 0 800 100" xmlns="http://www.w3.org/2000/svg">
+
+    <div class="ecg" id="ecg">
+
+        <svg viewBox="0 0 800 100"
+             xmlns="http://www.w3.org/2000/svg">
 
             <polyline
                 class="ecg-line"
@@ -222,23 +269,45 @@
             />
 
         </svg>
+
     </div>
 
 
     <!-- АНАТОМИЧЕСКОЕ СЕРДЦЕ -->
-    <div class="heart">🫀</div>
+
+    <div class="heart" id="heart">🫀</div>
 
 
-    <label for="gender">Выберите гендер:</label>
+    <!-- ВЫБОР ГЕНДЕРА -->
+
+    <label for="gender">
+        Выберите гендер:
+    </label>
+
 
     <select id="gender">
-        <option value="">Выберите</option>
-        <option value="male">Мужской</option>
-        <option value="female">Женский</option>
+
+        <option value="">
+            Выберите
+        </option>
+
+        <option value="male">
+            Мужской
+        </option>
+
+        <option value="female">
+            Женский
+        </option>
+
     </select>
 
 
-    <label for="weight">Введите вес:</label>
+    <!-- ВЕС -->
+
+    <label for="weight">
+        Введите вес:
+    </label>
+
 
     <input
         type="number"
@@ -248,14 +317,24 @@
     >
 
 
+    <!-- КНОПКА -->
+
     <button onclick="measurePulse()">
         Измерить
     </button>
 
 
+    <!-- ТАЙМЕР -->
+
     <div id="timer"></div>
 
+
+    <!-- РЕЗУЛЬТАТ -->
+
     <div id="result">—</div>
+
+
+    <!-- СОВЕТ -->
 
     <div id="advice"></div>
 
@@ -264,17 +343,30 @@
 
 <script>
 
+let measuring = false;
+let interval = null;
+
+
+/* СЛУЧАЙНОЕ ЧИСЛО */
+
 function randomNumber(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+
+    return Math.floor(
+        Math.random() * (max - min + 1)
+    ) + min;
+
 }
 
+
+/* РАСЧЁТ ПУЛЬСА */
 
 function getPulse(gender, weight) {
 
     weight = Number(weight);
 
 
-    // МУЖСКОЙ
+    /* МУЖСКОЙ */
+
     if (gender === "male") {
 
         if (weight >= 40 && weight < 60) {
@@ -292,10 +384,12 @@ function getPulse(gender, weight) {
         if (weight >= 80) {
             return randomNumber(120, 165);
         }
+
     }
 
 
-    // ЖЕНСКИЙ
+    /* ЖЕНСКИЙ */
+
     if (gender === "female") {
 
         if (weight >= 40 && weight < 60) {
@@ -305,91 +399,205 @@ function getPulse(gender, weight) {
         if (weight >= 60 && weight <= 100) {
             return randomNumber(140, 180);
         }
+
     }
 
 
     return null;
+
 }
 
 
+/* ЗАПУСК СЕРДЦА И КАРДИОГРАММЫ */
+
+function startAnimation() {
+
+    const heart =
+        document.getElementById("heart");
+
+    const ecg =
+        document.getElementById("ecg");
+
+
+    heart.classList.add("active");
+
+    ecg.classList.add("active");
+
+}
+
+
+/* ОСТАНОВКА СЕРДЦА И КАРДИОГРАММЫ */
+
+function stopAnimation() {
+
+    const heart =
+        document.getElementById("heart");
+
+    const ecg =
+        document.getElementById("ecg");
+
+
+    heart.classList.remove("active");
+
+    ecg.classList.remove("active");
+
+}
+
+
+/* ИЗМЕРЕНИЕ */
+
 function measurePulse() {
 
-    const gender = document.getElementById("gender").value;
-    const weight = document.getElementById("weight").value;
+    /* Если измерение уже идёт,
+       повторно не запускаем */
 
-    const result = document.getElementById("result");
-    const timer = document.getElementById("timer");
-    const advice = document.getElementById("advice");
+    if (measuring) {
+        return;
+    }
 
+
+    const gender =
+        document.getElementById("gender").value;
+
+
+    const weight =
+        document.getElementById("weight").value;
+
+
+    const result =
+        document.getElementById("result");
+
+
+    const timer =
+        document.getElementById("timer");
+
+
+    const advice =
+        document.getElementById("advice");
+    /* ПРОВЕРКА ГЕНДЕРА */
 
     if (!gender) {
 
-        result.textContent = "Выберите гендер.";
+        result.textContent =
+            "Выберите гендер.";
+
         timer.textContent = "";
+
         advice.textContent = "";
 
         return;
     }
 
+
+    /* ПРОВЕРКА ВЕСА */
 
     if (!weight) {
 
-        result.textContent = "Введите вес.";
+        result.textContent =
+            "Введите вес.";
+
         timer.textContent = "";
+
         advice.textContent = "";
 
         return;
     }
 
 
-    const pulse = getPulse(gender, weight);
+    const pulse =
+        getPulse(gender, weight);
 
+
+    /* ЕСЛИ НЕТ ЗНАЧЕНИЯ */
 
     if (pulse === null) {
 
-        result.textContent = "Для указанного веса нет значения.";
+        result.textContent =
+            "Для указанного веса нет значения.";
+
         timer.textContent = "";
+
         advice.textContent = "";
 
         return;
     }
 
 
+    /* НАЧАЛО ИЗМЕРЕНИЯ */
+
+    measuring = true;
+
+
     result.textContent = "—";
+
     advice.textContent = "";
+
+
+    /* ЗАПУСК СЕРДЦА */
+
+    startAnimation();
+
 
     let seconds = 15;
 
-    timer.textContent = "Измерение... 15 сек.";
+
+    timer.textContent =
+        "Измерение... 15 сек.";
 
 
-    const interval = setInterval(function() {
+    interval = setInterval(function() {
 
         seconds--;
+
 
         if (seconds > 0) {
 
             timer.textContent =
-                "Измерение... " + seconds + " сек.";
+                "Измерение... " +
+                seconds +
+                " сек.";
 
-        } else {
+        }
+
+        else {
 
             clearInterval(interval);
 
-            timer.textContent = "Измерение завершено";
+            interval = null;
 
-            result.textContent = pulse;
+            measuring = false;
 
-            showAdvice(pulse);
+
+            /* ОСТАНОВКА АНИМАЦИИ */
+
+            stopAnimation();
+
+
+            timer.textContent =
+                "Измерение завершено";
+
+
+            result.textContent =
+                pulse;
+
+
+            /* ПОКАЗЫВАЕМ СОВЕТ */
+
+            showAdvice();
+
         }
 
     }, 1000);
+
 }
 
 
-function showAdvice(pulse) {
+/* СЛУЧАЙНЫЙ СОВЕТ */
 
-    const advice = document.getElementById("advice");
+function showAdvice() {
+
+    const advice =
+        document.getElementById("advice");
 
 
     const tips = [
@@ -407,20 +615,59 @@ function showAdvice(pulse) {
         "Не перенапрягайтесь и делайте небольшие перерывы в течение дня.",
 
         "Старайтесь сохранять спокойствие и избегать лишнего стресса.",
-        "После нагрузки дайте своему организму время восстановиться."
+
+        "После нагрузки дайте своему организму время восстановиться.",
+
+        "Попробуйте ненадолго отвлечься от того, что вас беспокоит.",
+
+        "Сделайте несколько медленных и спокойных вдохов.",
+
+        "Если вы чувствуете напряжение, дайте себе немного времени на отдых.",
+
+        "Попробуйте заняться чем-нибудь спокойным, что помогает вам расслабиться.",
+
+        "Поговорите с человеком, которому вы доверяете, если вас что-то сильно беспокоит.",
+
+        "Не держите все переживания в себе — разговор с близким человеком иногда помогает почувствовать себя спокойнее."
+
     ];
 
 
-    const randomTip =
-        tips[Math.floor(Math.random() * tips.length)];
+    /* ВЫБИРАЕМ СЛУЧАЙНЫЙ СОВЕТ */
 
+    const randomTip =
+        tips[
+            Math.floor(
+                Math.random() * tips.length
+            )
+        ];
+
+
+    /* ВЫВОДИМ ЗЕЛЁНУЮ РАМКУ */
 
     advice.innerHTML =
-        '<div class="advice-title">Вы волнуетесь, совет который вам поможет:</div>' +
-        randomTip;
+
+        '<div class="advice-box">' +
+
+            '<div class="advice-title">' +
+
+                'Судя по вашему сердцебиению, вы испытываете негативные эмоции. ' +
+                'Вот советы, как справиться с ними:' +
+
+            '</div>' +
+
+            '<div class="advice-text">' +
+
+                randomTip +
+
+            '</div>' +
+
+        '</div>';
+
 }
 
 </script>
 
 </body>
 </html>
+                
