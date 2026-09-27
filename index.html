@@ -27,40 +27,16 @@
         h1 {
             font-family: "Times New Roman", Times, serif;
             font-size: 28px;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
-        .heart {
-            font-size: 58px;
-            margin: 10px 0 15px;
-            animation: heartbeat 1.5s infinite;
-        }
-
-        @keyframes heartbeat {
-            0% {
-                transform: scale(1);
-            }
-
-            10% {
-                transform: scale(1.12);
-            }
-
-            20% {
-                transform: scale(1);
-            }
-
-            100% {
-                transform: scale(1);
-            }
-        }
-
-        /* КАРДИОГРАММА */
+        /* КАРДИОГРАММА НАД СЕРДЦЕМ */
 
         .ecg {
             width: 100%;
             max-width: 400px;
             height: 90px;
-            margin: 0 auto 25px;
+            margin: 0 auto 5px;
             overflow: hidden;
             position: relative;
         }
@@ -91,6 +67,32 @@
 
             100% {
                 stroke-dashoffset: 0;
+            }
+        }
+
+        /* СЕРДЦЕ */
+
+        .heart {
+            font-size: 58px;
+            margin: 0 0 20px;
+            animation: heartbeat 1.5s infinite;
+        }
+
+        @keyframes heartbeat {
+            0% {
+                transform: scale(1);
+            }
+
+            10% {
+                transform: scale(1.12);
+            }
+
+            20% {
+                transform: scale(1);
+            }
+
+            100% {
+                transform: scale(1);
             }
         }
 
@@ -156,6 +158,11 @@
             line-height: 1.5;
             color: #333;
         }
+
+        .advice-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
     </style>
 </head>
 
@@ -165,9 +172,7 @@
 
     <h1>❤️ Трекер пульса</h1>
 
-    <div class="heart">🫀</div>
-
-    <!-- АНИМАТИЧНАЯ КАРДИОГРАММА -->
+    <!-- КАРДИОГРАММА -->
     <div class="ecg">
         <svg viewBox="0 0 800 100" xmlns="http://www.w3.org/2000/svg">
 
@@ -218,6 +223,10 @@
 
         </svg>
     </div>
+
+
+    <!-- АНАТОМИЧЕСКОЕ СЕРДЦЕ -->
+    <div class="heart">🫀</div>
 
 
     <label for="gender">Выберите гендер:</label>
@@ -382,23 +391,23 @@ function showAdvice(pulse) {
 
     const advice = document.getElementById("advice");
 
+
     const tips = [
 
-        "Старайтесь спокойно дышать и избегать лишнего стресса.",
+        "Сделайте несколько спокойных вдохов и постарайтесь расслабиться.",
 
-        "После физической нагрузки дайте организму время восстановиться.",
+        "Если вы недавно двигались или занимались спортом, немного отдохните.",
 
-        "Следите за достаточным количеством отдыха и сна.",
+        "Постарайтесь выспаться и дать организму достаточно времени на восстановление.",
 
-        "Пейте достаточно воды в течение дня.",
+        "В течение дня не забывайте пить воду.",
 
-        "Если самочувствие плохое, лучше сделать паузу и отдохнуть.",
+        "Если вы чувствуете себя плохо, остановитесь и отдохните.",
 
-        "Регулярная физическая активность помогает поддерживать организм в тонусе.",
+        "Не перенапрягайтесь и делайте небольшие перерывы в течение дня.",
 
-        "Не забывайте делать перерывы после длительной нагрузки.",
-
-        "Старайтесь сохранять спокойствие и не перенапрягаться."
+        "Старайтесь сохранять спокойствие и избегать лишнего стресса.",
+        "После нагрузки дайте своему организму время восстановиться."
     ];
 
 
@@ -406,10 +415,12 @@ function showAdvice(pulse) {
         tips[Math.floor(Math.random() * tips.length)];
 
 
-    advice.textContent = randomTip;
+    advice.innerHTML =
+        '<div class="advice-title">Вы волнуетесь, совет который вам поможет:</div>' +
+        randomTip;
 }
 
 </script>
 
 </body>
-    </html>
+</html>
